@@ -1,0 +1,601 @@
+<!-- Template: Dark -->
+<!-- Description: Minimal dark mode template with clean typography -->
+<!-- Supports: logo, title, subtitle, content, footer, colors -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{subject}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* ================================
+           Reset and Base Styles
+           ================================ */
+        body, table, td, a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* ================================
+           Dark Theme Base
+           ================================ */
+        .dark-email {
+            background: #111111 !important;
+        }
+
+        .dark-email .email-card {
+            background: #1a1a1a !important;
+        }
+
+        .dark-email .email-content {
+            background: #1a1a1a !important;
+            color: #e5e5e5 !important;
+        }
+
+        /* ================================
+           Text Elements
+           ================================ */
+        .dark-email .email-content h2,
+        .dark-email .email-content h3,
+        .dark-email .email-content p,
+        .dark-email .email-content div {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .email-content strong {
+            color: #f3f4f6 !important;
+        }
+
+        /* ================================
+           Component: Dividers
+           ================================ */
+        .dark-email .component-divider {
+            border-top-color: #3b3b3b !important;
+        }
+
+        /* ================================
+           Component: Alerts
+           ================================ */
+        .dark-email .component-alert {
+            filter: brightness(0.8);
+            color: #e5e5e5 !important;
+        }
+
+        /* ================================
+           Component: Buttons
+           ================================ */
+        .dark-email .button-outline,
+        .dark-email .button-secondary,
+        .dark-email .button-cancel {
+            background: #3a3a3a !important;
+            border: 1px solid #555 !important;
+            color: #e5e5e5 !important;
+        }
+
+        /* ================================
+           Component: Code Blocks
+           ================================ */
+        .dark-email .code-content {
+            background: #2a2a2a !important;
+            border-color: #555 !important;
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .code-label {
+            color: #9ca3af !important;
+        }
+
+        /* ================================
+           Component: Coupons
+           ================================ */
+        .dark-email .component-coupon {
+            background: rgba(245, 158, 11, 0.15) !important;
+        }
+
+        .dark-email .coupon-code {
+            background: #2a2a2a !important;
+            color: #f59e0b !important;
+        }
+
+        .dark-email .coupon-description,
+        .dark-email .coupon-expiry {
+            color: #e5e5e5 !important;
+        }
+
+        /* ================================
+           Component: Info Boxes
+           ================================ */
+        .dark-email .component-info-box {
+            background: #333333 !important;
+        }
+
+        .dark-email .info-box-title {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .info-box-content {
+            color: #d1d5db !important;
+        }
+
+        /* ================================
+           Component: Key-Value Lists
+           ================================ */
+        .dark-email .kv-item {
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .kv-key {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .kv-value {
+            color: #e5e5e5 !important;
+        }
+
+        /* ================================
+           Component: Progress Bars
+           ================================ */
+        .dark-email .progress-label {
+            color: #d1d5db !important;
+        }
+
+        .dark-email .progress-track {
+            background: #404040 !important;
+        }
+
+        .dark-email .progress-percentage {
+            color: #9ca3af !important;
+        }
+
+        /* ================================
+           Component: Tables
+           ================================ */
+        .dark-email .table-header-cell {
+            color: #d1d5db !important;
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .table-body-cell {
+            color: #e5e5e5 !important;
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .row-striped {
+            background: #2a2a2a !important;
+        }
+
+        .dark-email .table-striped .table-header-cell {
+            background: #333333 !important;
+        }
+
+        /* ================================
+           Component: Stats Grid
+           ================================ */
+        .dark-email .stat-cell {
+            border-color: #404040 !important;
+            background: #2a2a2a !important;
+        }
+
+        .dark-email .stat-value {
+            color: #f3f4f6 !important;
+        }
+
+        .dark-email .stat-label {
+            color: #9ca3af !important;
+        }
+
+        /* ================================
+           Component: Product Lists
+           ================================ */
+        .dark-email .product-item {
+            border-color: #404040 !important;
+            background: #2a2a2a !important;
+        }
+
+        .dark-email .product-name,
+        .dark-email .product-link,
+        .dark-email .product-price {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .product-description,
+        .dark-email .product-quantity {
+            color: #9ca3af !important;
+        }
+
+        /* ================================
+           Component: Downloads
+           ================================ */
+        .dark-email .component-downloads-list {
+            background: #2a2a2a !important;
+        }
+
+        .dark-email .download-item {
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .download-name {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .download-description {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .download-link {
+            color: #60a5fa !important;
+        }
+
+        /* ================================
+           Component: Activity Logs
+           ================================ */
+        .dark-email .component-activity-log {
+            background: #2a2a2a !important;
+            border-color: #404040 !important;
+        }
+
+        .dark-email .activity-item {
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .activity-action {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .activity-meta {
+            color: #9ca3af !important;
+        }
+
+        /* ================================
+           Component: Event Details
+           ================================ */
+        .dark-email .component-event-details {
+            background: #2a2a2a !important;
+            border-color: #404040 !important;
+        }
+
+        .dark-email .event-header {
+            background: #333333 !important;
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .event-date {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .event-time,
+        .dark-email .event-duration {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .event-title {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .event-description {
+            color: #d1d5db !important;
+        }
+
+        .dark-email .event-label {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .event-value {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .event-attendees-more {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .event-location-link {
+            color: #60a5fa !important;
+        }
+
+        /* ================================
+           Component: Order Items / Invoices
+           ================================ */
+        .dark-email .component-order-items tr {
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .order-header tr {
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .order-col-item,
+        .dark-email .order-col-qty,
+        .dark-email .order-col-price,
+        .dark-email .order-col-total {
+            color: #d1d5db !important;
+        }
+
+        .dark-email .order-item-row {
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .order-item-name,
+        .dark-email .order-item-total {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .order-item-qty,
+        .dark-email .order-item-price {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .order-label {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .order-value {
+            color: #d1d5db !important;
+        }
+
+        .dark-email .order-discount {
+            color: #34d399 !important;
+        }
+
+        .dark-email .order-total-row {
+            border-top-color: #404040 !important;
+        }
+
+        .dark-email .order-total-label,
+        .dark-email .order-total-value {
+            color: #f3f4f6 !important;
+        }
+
+        /* ================================
+           Component: Reward Balance
+           ================================ */
+        .dark-email .reward-activity {
+            background: #2a2a2a !important;
+            border-color: #404040 !important;
+        }
+
+        .dark-email .activity-title {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .activity-row {
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .activity-description {
+            color: #d1d5db !important;
+        }
+
+        .dark-email .activity-date {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .amount-positive {
+            color: #34d399 !important;
+        }
+
+        .dark-email .amount-negative {
+            color: #f87171 !important;
+        }
+
+        /* ================================
+           Component: Shipping Tracker
+           ================================ */
+        .dark-email .component-shipping-tracker {
+            background: #2a2a2a !important;
+        }
+
+        .dark-email .tracker-carrier {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .tracker-number {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .tracker-number-link {
+            color: #60a5fa !important;
+        }
+
+        .dark-email .tracker-status {
+            background: #333333 !important;
+        }
+
+        .dark-email .status-label,
+        .dark-email .status-delivery {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .status-value {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .step-completed .step-label {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .step-pending .step-label {
+            color: #6b7280 !important;
+        }
+
+        .dark-email .step-timestamp {
+            color: #6b7280 !important;
+        }
+
+        .dark-email .indicator-pending {
+            background: #404040 !important;
+        }
+
+        .dark-email .step-pending .step-line {
+            background: #404040 !important;
+        }
+
+        /* ================================
+           Component: Subscription Status
+           ================================ */
+        .dark-email .component-subscription-status {
+            background: #2a2a2a !important;
+            border-color: #404040 !important;
+        }
+
+        .dark-email .subscription-header {
+            border-bottom-color: #404040 !important;
+        }
+
+        .dark-email .subscription-plan-name {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .subscription-price {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .subscription-interval {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .subscription-next-billing {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .subscription-next-billing strong {
+            color: #d1d5db !important;
+        }
+
+        .dark-email .subscription-features {
+            background: #333333 !important;
+        }
+
+        .dark-email .features-title {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .feature-item {
+            color: #d1d5db !important;
+        }
+
+        .dark-email .feature-check {
+            color: #34d399 !important;
+        }
+
+        .dark-email .subscription-actions {
+            border-top-color: #404040 !important;
+        }
+
+        /* ================================
+           Component: Testimonials
+           ================================ */
+        .dark-email .testimonial-quote {
+            color: #d1d5db !important;
+        }
+
+        .dark-email .testimonial-author {
+            color: #e5e5e5 !important;
+        }
+
+        .dark-email .testimonial-role {
+            color: #9ca3af !important;
+        }
+
+        /* ================================
+           Footer
+           ================================ */
+        .dark-email .email-footer,
+        .dark-email .email-footer * {
+            color: #9ca3af !important;
+        }
+
+        .dark-email .email-footer *[style*="#e5e7eb"] {
+            border-top-color: #404040 !important;
+        }
+
+        /* ================================
+           Mobile Responsive Styles
+           ================================ */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+
+            .email-content {
+                padding: 24px !important;
+            }
+
+            .email-header {
+                padding: 32px 24px !important;
+            }
+
+            h1 {
+                font-size: 26px !important;
+            }
+        }
+    </style>
+</head>
+<body class="dark-email"
+      style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #111111;">
+<div class="email-wrapper" style="padding: 40px 20px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" align="center" class="email-container"
+           style="margin: 0 auto;">
+        <tr>
+            <td class="email-card"
+                style="background: #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+                <!-- Header -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="email-header"
+                            style="background: {color_primary}; padding: 48px 40px; text-align: center;">
+                            {logo}
+                            <h1 style="margin: 20px 0 12px; color: white; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">
+                                {title}</h1>
+                            <p style="margin: 0; color: rgba(255,255,255,0.95); font-size: 16px; line-height: 1.5;">
+                                {subtitle}</p>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Main Content -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="email-content"
+                            style="padding: 40px; color: #e5e5e5; font-size: 16px; line-height: 1.6;">
+                            {content}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" align="center" class="email-container"
+           style="margin: 0 auto;">
+        <tr>
+            <td class="email-footer" style="padding: 20px; text-align: center; color: #6b7280; font-size: 13px;">
+                {footer}
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

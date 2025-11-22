@@ -1,0 +1,52 @@
+{
+  "name": "arraypress/wp-register-emails",
+  "version": "1.0.0",
+  "description": "A comprehensive WordPress email registration and templating system with component builders, tag processing, and visual templates.",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://github.com/arraypress/wp-register-emails",
+  "authors": [
+    {
+      "name": "David Sherlock",
+      "homepage": "https://arraypress.com/"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "arraypress/wp-currencies": "dev-main"
+  },
+  "autoload": {
+    "psr-4": {
+      "ArrayPress\\RegisterEmails\\": "src/"
+    },
+    "files": [
+      "src/Utils/Functions.php"
+    ]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "preferred-install": "dist"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "support": {
+    "issues": "https://github.com/arraypress/wp-register-emails/issues",
+    "source": "https://github.com/arraypress/wp-register-emails"
+  },
+  "keywords": [
+    "wordpress",
+    "wp",
+    "email",
+    "email-templates",
+    "email-registration",
+    "html-email",
+    "mail",
+    "wp-mail",
+    "responsive-email",
+    "transactional-email",
+    "email-components",
+    "tag-processing",
+    "arraypress"
+  ]
+}

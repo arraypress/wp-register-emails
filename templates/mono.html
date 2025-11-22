@@ -1,0 +1,240 @@
+<!-- Template: Mono -->
+<!-- Description: Ultra-minimal black and white design with clean typography -->
+<!-- Supports: logo, title, subtitle, content, footer, colors -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{subject}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Reset and Base */
+        body, table, td, a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* Mono Theme */
+        .mono-email {
+            background: #ffffff !important;
+        }
+
+        .mono-email .email-card {
+            background: #ffffff !important;
+            border: 1px solid #000000 !important;
+        }
+
+        .mono-email .email-header {
+            background: #000000 !important;
+            color: #ffffff !important;
+        }
+
+        .mono-email .email-content {
+            background: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Text */
+        .mono-email .email-content h2 {
+            color: #000000 !important;
+            border-bottom: 2px solid #000000 !important;
+            padding-bottom: 8px !important;
+            margin-bottom: 16px !important;
+        }
+
+        .mono-email .email-content h3 {
+            color: #000000 !important;
+            font-weight: 700 !important;
+        }
+
+        .mono-email .email-content p {
+            color: #333333 !important;
+        }
+
+        /* Components */
+        .mono-email .component-button {
+            background: #000000 !important;
+            color: #ffffff !important;
+            border: none !important;
+        }
+
+        .mono-email .button-secondary {
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: 2px solid #000000 !important;
+        }
+
+        .mono-email .component-alert {
+            background: #f8f8f8 !important;
+            border-left: 4px solid #000000 !important;
+            color: #000000 !important;
+        }
+
+        .mono-email .code-content {
+            background: #000000 !important;
+            color: #ffffff !important;
+            font-family: monospace !important;
+        }
+
+        .mono-email .stat-cell {
+            border: 1px solid #e0e0e0 !important;
+            background: #ffffff !important;
+        }
+
+        .mono-email .stat-value {
+            color: #000000 !important;
+        }
+
+        .mono-email .stat-label {
+            color: #666666 !important;
+        }
+
+        .mono-email .subscription-status-badge {
+            background: #000000 !important;
+        }
+
+        .mono-email .feature-check {
+            color: #000000 !important;
+        }
+
+        .mono-email .component-reward-balance {
+            background: #f9fafb !important;
+            border-radius: 6px;
+            color: #000000 !important;
+        }
+
+        .mono-email .reward-expiry-warning {
+            background: rgb(255 255 255) !important;
+        }
+
+        .mono-email .reward-tier {
+            border-top-color: #000000 !important;
+        }
+
+        .mono-email .tracker-status {
+            border-left-color: #000000 !important;
+        }
+
+        .mono-email .component-testimonial {
+            border-left-color: #000000 !important;
+        }
+
+        /* Tables */
+        .mono-email .order-header th {
+            color: #000000 !important;
+            border-bottom: 2px solid #000000 !important;
+        }
+
+        .mono-email .order-item-row {
+            border-bottom: 1px solid #e0e0e0 !important;
+        }
+
+        .mono-email .order-total-row {
+            border-top: 2px solid #000000 !important;
+        }
+
+        .mono-email .order-total-value {
+            color: #000000 !important;
+        }
+
+        /* Products */
+        .mono-email .product-item {
+            border: 1px solid #e0e0e0 !important;
+            background: #ffffff !important;
+        }
+
+        .mono-email .product-price {
+            color: #000000 !important;
+        }
+
+        .mono-email .step-indicator {
+            background: #000000 !important;
+        }
+
+        /* Footer */
+        .mono-email .email-footer {
+            color: #666666 !important;
+            border-top: 1px solid #e0e0e0 !important;
+        }
+
+        .mono-email .email-footer a {
+            color: #000000 !important;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+
+            .email-content {
+                padding: 24px !important;
+            }
+        }
+    </style>
+</head>
+<body class="mono-email"
+      style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background: #ffffff;">
+<div class="email-wrapper" style="padding: 40px 20px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" align="center" class="email-container"
+           style="margin: 0 auto;">
+        <tr>
+            <td class="email-card">
+                <!-- Header -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="email-header" style="padding: 48px 40px; text-align: center;">
+                            {logo}
+                            <h1 style="margin: 20px 0 12px; color: white; font-size: 32px; font-weight: 700;">
+                                {title}</h1>
+                            <p style="margin: 0; color: rgba(255,255,255,0.9); font-size: 16px;">
+                                {subtitle}</p>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Content -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="email-content" style="padding: 40px; font-size: 16px; line-height: 1.6;">
+                            {content}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" align="center" class="email-container"
+           style="margin: 0 auto;">
+        <tr>
+            <td class="email-footer" style="padding: 30px 20px; text-align: center; font-size: 13px;">
+                {footer}
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

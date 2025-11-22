@@ -1,0 +1,220 @@
+<!-- Template: Soft -->
+<!-- Description: Gentle design with soft colors and rounded corners -->
+<!-- Supports: logo, title, subtitle, content, footer, colors -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{subject}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+    <style>
+        /* Reset and Base */
+        body, table, td, a {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            outline: none;
+            text-decoration: none;
+        }
+
+        /* Soft Theme */
+        .soft-email {
+            background: #fafbfc !important;
+        }
+
+        .soft-email .email-card {
+            background: #ffffff !important;
+            border: none !important;
+        }
+
+        .soft-email .email-header {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        }
+
+        .soft-email .email-content {
+            background: #ffffff !important;
+            color: #4a5568 !important;
+        }
+
+        /* Text */
+        .soft-email .email-content h2 {
+            color: #2d3748 !important;
+            font-weight: 600 !important;
+        }
+
+        .soft-email .email-content h3 {
+            color: #4a5568 !important;
+        }
+
+        .soft-email .email-content p {
+            color: #718096 !important;
+        }
+
+        /* Components */
+        .soft-email .component-button {
+            background: #667eea !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
+        }
+
+        .soft-email .button-secondary {
+            background: #edf2f7 !important;
+            color: #4a5568 !important;
+            border: none !important;
+            border-radius: 8px !important;
+        }
+
+        .soft-email .component-alert {
+            background: #f7fafc !important;
+            border-left: 3px solid #667eea !important;
+            border-radius: 4px !important;
+        }
+
+        .soft-email .code-content {
+            background: #f7fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            color: #2d3748 !important;
+            border-radius: 4px !important;
+        }
+
+        .soft-email .stat-cell {
+            border: none !important;
+            background: #f7fafc !important;
+            border-radius: 8px !important;
+        }
+
+        .soft-email .stat-value {
+            color: #667eea !important;
+            font-weight: 600 !important;
+        }
+
+        .soft-email .stat-label {
+            color: #a0aec0 !important;
+        }
+
+        /* Tables */
+        .soft-email .order-header th {
+            background: #f7fafc !important;
+            color: #4a5568 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        .soft-email .order-item-row {
+            border-bottom: 1px solid #edf2f7 !important;
+        }
+
+        .soft-email .order-total-row {
+            border-top: 2px solid #e2e8f0 !important;
+            background: #f7fafc !important;
+        }
+
+        .soft-email .order-total-value {
+            color: #2d3748 !important;
+        }
+
+        /* Products */
+        .soft-email .product-item {
+            border: 1px solid #edf2f7 !important;
+            background: #ffffff !important;
+            border-radius: 8px !important;
+        }
+
+        .soft-email .product-price {
+            color: #667eea !important;
+        }
+
+        /* Progress */
+        .soft-email .progress-track {
+            background: #edf2f7 !important;
+            border-radius: 12px !important;
+        }
+
+        .soft-email .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2) !important;
+            border-radius: 12px !important;
+        }
+
+        /* Footer */
+        .soft-email .email-footer {
+            color: #a0aec0 !important;
+        }
+
+        .soft-email .email-footer a {
+            color: #667eea !important;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+
+            .email-content {
+                padding: 24px !important;
+            }
+        }
+    </style>
+</head>
+<body class="soft-email"
+      style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+<div class="email-wrapper" style="padding: 40px 20px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" align="center" class="email-container"
+           style="margin: 0 auto;">
+        <tr>
+            <td class="email-card" style="border-radius: 12px; overflow: hidden;">
+                <!-- Header -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="email-header" style="padding: 48px 40px; text-align: center;">
+                            {logo}
+                            <h1 style="margin: 20px 0 12px; color: #2d3748; font-size: 32px; font-weight: 700;">
+                                {title}</h1>
+                            <p style="margin: 0; color: #4a5568; font-size: 16px;">
+                                {subtitle}</p>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Content -->
+                <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="email-content" style="padding: 40px; font-size: 16px; line-height: 1.7;">
+                            {content}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" align="center" class="email-container"
+           style="margin: 0 auto;">
+        <tr>
+            <td class="email-footer" style="padding: 30px 20px; text-align: center; font-size: 13px;">
+                {footer}
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
