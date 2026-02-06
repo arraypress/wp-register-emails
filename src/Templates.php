@@ -226,6 +226,41 @@ class Templates {
 		return in_array( $template, self::get_available_templates(), true );
 	}
 
+	// In ArrayPress\RegisterEmails\Templates
+
+	/**
+	 * Get template options for select fields.
+	 *
+	 * Returns an associative array of template slug => label
+	 * suitable for use as dropdown options in settings UIs.
+	 *
+	 * @return array Associative array of template_slug => Template Label.
+	 * @since 1.0.0
+	 */
+	public static function get_options(): array {
+		$options   = [];
+		$templates = self::get_available_templates();
+
+		foreach ( $templates as $slug ) {
+			$meta             = self::get_template_meta( $slug );
+			$options[ $slug ] = $meta['name'];
+		}
+
+		if ( empty( $options ) ) {
+			$options['default'] = __( 'Default', 'register-emails' );
+		}
+
+		/**
+		 * Filter the available email template options.
+		 *
+		 * @param array $options Associative array of template_slug => label.
+		 *
+		 * @since 1.0.0
+		 *
+		 */
+		return apply_filters( 'register_emails_template_options', $options );
+	}
+
 	/**
 	 * Minimal fallback template
 	 *
