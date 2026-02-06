@@ -281,20 +281,18 @@ class TemplateManager {
 		// Build default replacements
 		$default_replacements = $this->get_default_replacements();
 
-		// Apply replacements to ALL settings fields (title, subtitle, subject, message)
+		// Apply default replacements to ALL settings fields (title, subtitle, subject, message)
 		foreach ( [ 'subject', 'message', 'title', 'subtitle' ] as $field ) {
 			if ( isset( $settings[ $field ] ) ) {
 				$settings[ $field ] = strtr( $settings[ $field ], $default_replacements );
 			}
 		}
 
-		// Add the processed title and subtitle to replacements
-		$default_replacements['{title}']    = $settings['title'] ?? '';
-		$default_replacements['{subtitle}'] = $settings['subtitle'] ?? '';
-
-		// Determine final subject and message
-		$subject = $args['subject'] ?? $settings['subject'] ?? '';
-		$message = $args['message'] ?? $settings['message'] ?? '';
+		// Determine final subject, message, title, and subtitle
+		$subject  = $args['subject'] ?? $settings['subject'] ?? '';
+		$message  = $args['message'] ?? $settings['message'] ?? '';
+		$title    = $args['title'] ?? $settings['title'] ?? '';
+		$subtitle = $args['subtitle'] ?? $settings['subtitle'] ?? '';
 
 		// Get tag groups from template
 		$tag_groups = $template->get_tag_groups();
@@ -303,12 +301,20 @@ class TemplateManager {
 		$processor = new Processor( $this->registry );
 
 		if ( ! empty( $args['data'] ) ) {
-			$subject = $processor->process_groups( $subject, $tag_groups, $args['data'] );
-			$message = $processor->process_groups( $message, $tag_groups, $args['data'] );
+			$subject  = $processor->process_groups( $subject, $tag_groups, $args['data'] );
+			$message  = $processor->process_groups( $message, $tag_groups, $args['data'] );
+			$title    = $processor->process_groups( $title, $tag_groups, $args['data'] );
+			$subtitle = $processor->process_groups( $subtitle, $tag_groups, $args['data'] );
 		} elseif ( ! empty( $args['preview'] ) ) {
-			$subject = $processor->process_preview_groups( $subject, $tag_groups );
-			$message = $processor->process_preview_groups( $message, $tag_groups );
+			$subject  = $processor->process_preview_groups( $subject, $tag_groups );
+			$message  = $processor->process_preview_groups( $message, $tag_groups );
+			$title    = $processor->process_preview_groups( $title, $tag_groups );
+			$subtitle = $processor->process_preview_groups( $subtitle, $tag_groups );
 		}
+
+		// Update replacements with processed title and subtitle
+		$default_replacements['{title}']    = $title;
+		$default_replacements['{subtitle}'] = $subtitle;
 
 		return [
 			'subject'      => $subject,
@@ -370,8 +376,8 @@ class TemplateManager {
 	 * override keys, indicating this is an editor content override rather
 	 * than a real data object for tag processing.
 	 *
-	 * @param array $data           The array to check.
-	 * @param array $override_keys  Allowed override key names.
+	 * @param array $data          The array to check.
+	 * @param array $override_keys Allowed override key names.
 	 *
 	 * @return bool True if all keys match override keys.
 	 * @since  1.0.0
