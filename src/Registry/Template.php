@@ -66,14 +66,15 @@ class Template {
 	private string $template;
 
 	/**
-	 * Tag group prefix
+	 * Tag group prefixes
 	 *
-	 * Determines which set of registered tags are available for this template.
+	 * Determines which sets of registered tags are available for this template.
+	 * Multiple groups allow combining tags from different registrations.
 	 *
 	 * @since 1.0.0
-	 * @var string
+	 * @var string[]
 	 */
-	private string $tag_group;
+	private array $tag_groups;
 
 	/**
 	 * Settings retrieval callback
@@ -131,19 +132,20 @@ class Template {
 	/**
 	 * Constructor
 	 *
-	 * @param string  $name              Template identifier
-	 * @param array   $config            {
-	 *                                   Template configuration array
+	 * @param string         $name              Template identifier
+	 * @param array          $config            {
+	 *                                          Template configuration array
 	 *
-	 * @type string   $label             Display name. Default: Humanized $name
-	 * @type string   $description       Template description. Default: empty
-	 * @type string   $template          Visual template. Default: 'default'
-	 * @type string   $tag_group         Tag group prefix. Default: empty
-	 * @type callable $settings_callback Settings retrieval function. Default: null
-	 * @type array    $default_settings  Default settings. Default: see property
-	 * @type array    $visual_config     Visual configuration. Default: see get_default_visual_config()
-	 * @type string   $capability        Required capability. Default: 'manage_options'
-	 *                                   }
+	 * @type string          $label             Display name. Default: Humanized $name
+	 * @type string          $description       Template description. Default: empty
+	 * @type string          $template          Visual template. Default: 'default'
+	 * @type string|string[] $tag_groups        Tag group(s). Default: empty. Accepts 'tag_group' (string) or
+	 *       'tag_groups' (array).
+	 * @type callable        $settings_callback Settings retrieval function. Default: null
+	 * @type array           $default_settings  Default settings. Default: see property
+	 * @type array           $visual_config     Visual configuration. Default: see get_default_visual_config()
+	 * @type string          $capability        Required capability. Default: 'manage_options'
+	 *                                          }
 	 *
 	 * @since 1.0.0
 	 */
@@ -155,6 +157,7 @@ class Template {
 			'label'             => ucfirst( str_replace( '_', ' ', $name ) ),
 			'description'       => '',
 			'template'          => 'default',
+			'tag_groups'        => [],
 			'tag_group'         => '',
 			'settings_callback' => null,
 			'default_settings'  => [
@@ -170,6 +173,13 @@ class Template {
 
 		$config = wp_parse_args( $config, $defaults );
 
+		// Resolve tag_groups from either key, with backwards compatibility
+		$tag_groups = $config['tag_groups'];
+
+		if ( empty( $tag_groups ) && ! empty( $config['tag_group'] ) ) {
+			$tag_groups = (array) $config['tag_group'];
+		}
+
 		// Merge visual config with defaults
 		$config['visual_config'] = wp_parse_args( $config['visual_config'], $this->get_default_visual_config() );
 
@@ -177,7 +187,7 @@ class Template {
 		$this->label             = $config['label'];
 		$this->description       = $config['description'];
 		$this->template          = $config['template'];
-		$this->tag_group         = $config['tag_group'];
+		$this->tag_groups        = array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) $tag_groups ) ) ) );
 		$this->settings_callback = $config['settings_callback'];
 		$this->default_settings  = $config['default_settings'];
 		$this->visual_config     = $config['visual_config'];
@@ -320,13 +330,26 @@ class Template {
 	}
 
 	/**
-	 * Get tag group
+	 * Get tag groups
 	 *
-	 * @return string Tag group prefix for this template
+	 * @return string[] Tag group prefixes for this template
 	 * @since 1.0.0
 	 */
+	public function get_tag_groups(): array {
+		return $this->tag_groups;
+	}
+
+	/**
+	 * Get tag group (backwards compatibility)
+	 *
+	 * Returns the first tag group for code that expects a single string.
+	 *
+	 * @return string First tag group prefix or empty string
+	 * @since      1.0.0
+	 * @deprecated Use get_tag_groups() instead
+	 */
 	public function get_tag_group(): string {
-		return $this->tag_group;
+		return $this->tag_groups[0] ?? '';
 	}
 
 	/**

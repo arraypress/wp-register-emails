@@ -173,6 +173,33 @@ class Registry {
 	}
 
 	/**
+	 * Get registered tags from multiple groups, merged and deduplicated.
+	 *
+	 * Tags are merged in order, so later groups do not overwrite earlier ones
+	 * if a tag with the same name already exists.
+	 *
+	 * @param string[] $groups Array of group/prefix names.
+	 *
+	 * @return array<string, Tag> Merged array of tag name => Tag instance.
+	 * @since 1.0.0
+	 */
+	public function get_tags_for_groups( array $groups ): array {
+		$merged = [];
+
+		foreach ( $groups as $group ) {
+			$tags = $this->get_tags( $group );
+
+			foreach ( $tags as $name => $tag ) {
+				if ( ! isset( $merged[ $name ] ) ) {
+					$merged[ $name ] = $tag;
+				}
+			}
+		}
+
+		return $merged;
+	}
+
+	/**
 	 * Get a specific tag
 	 *
 	 * @param string $prefix Tag prefix/group
@@ -241,9 +268,9 @@ class Registry {
 			);
 		}
 
-		// Default tag group to prefix if not specified
-		if ( ! isset( $config['tag_group'] ) ) {
-			$config['tag_group'] = $prefix;
+		// Default tag_groups to prefix if neither tag_groups nor tag_group is specified
+		if ( empty( $config['tag_groups'] ) && empty( $config['tag_group'] ) ) {
+			$config['tag_groups'] = [ $prefix ];
 		}
 
 		// Create and store template
@@ -323,7 +350,7 @@ class Registry {
 	/**
 	 * Get tags available for a specific template
 	 *
-	 * Returns all tags registered to the template's tag group.
+	 * Returns all tags registered to the template's tag groups.
 	 *
 	 * @param string      $prefix        Template prefix
 	 * @param string|null $template_name Template name (null for all in prefix)
@@ -338,12 +365,10 @@ class Registry {
 				return [];
 			}
 
-			$tag_group = $template->get_tag_group();
+			$tags = $this->get_tags_for_groups( $template->get_tag_groups() );
 		} else {
-			$tag_group = $prefix;
+			$tags = $this->get_tags( $prefix );
 		}
-
-		$tags = $this->get_tags( $tag_group );
 
 		return array_map( function ( $tag ) {
 			return [

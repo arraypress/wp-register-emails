@@ -296,15 +296,18 @@ class TemplateManager {
 		$subject = $args['subject'] ?? $settings['subject'] ?? '';
 		$message = $args['message'] ?? $settings['message'] ?? '';
 
+		// Get tag groups from template
+		$tag_groups = $template->get_tag_groups();
+
 		// Process tags if data provided or in preview mode
 		$processor = new Processor( $this->registry );
 
 		if ( ! empty( $args['data'] ) ) {
-			$subject = $processor->process( $subject, $template->get_tag_group(), $args['data'] );
-			$message = $processor->process( $message, $template->get_tag_group(), $args['data'] );
+			$subject = $processor->process_groups( $subject, $tag_groups, $args['data'] );
+			$message = $processor->process_groups( $message, $tag_groups, $args['data'] );
 		} elseif ( ! empty( $args['preview'] ) ) {
-			$subject = $processor->process_preview( $subject, $template->get_tag_group() );
-			$message = $processor->process_preview( $message, $template->get_tag_group() );
+			$subject = $processor->process_preview_groups( $subject, $tag_groups );
+			$message = $processor->process_preview_groups( $message, $tag_groups );
 		}
 
 		return [
