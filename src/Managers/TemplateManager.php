@@ -320,26 +320,71 @@ class TemplateManager {
 	/**
 	 * Get preview HTML
 	 *
-	 * Returns the rendered email template for preview purposes.
+	 * Returns the rendered email template for preview purposes. Accepts either
+	 * content overrides (subject/message/title/subtitle from the editor) which
+	 * keep preview mode active for tag processing, or real data (an order object)
+	 * which disables preview mode and processes tags with real values.
 	 *
-	 * @param string $prefix        Template prefix
-	 * @param string $template_name Template name
-	 * @param mixed  $data          Preview data
+	 * @param string     $prefix        Template prefix
+	 * @param string     $template_name Template name
+	 * @param array|null $overrides     Content overrides or real data object.
+	 *                                  Arrays with only string values and keys matching
+	 *                                  'subject', 'message', 'title', or 'subtitle' are
+	 *                                  treated as content overrides (preview mode stays on).
+	 *                                  All other values are treated as real data for tag
+	 *                                  processing (preview mode is disabled).
 	 *
 	 * @return string Complete HTML document
 	 * @since 1.0.0
 	 */
-	public function get_preview_html( string $prefix, string $template_name, $data = null ): string {
+	public function get_preview_html( string $prefix, string $template_name, $overrides = null ): string {
 		$args = [ 'preview' => true ];
 
-		if ( $data !== null ) {
-			$args['data'] = $data;
-			unset( $args['preview'] );
+		if ( $overrides !== null ) {
+			// Check if this is content overrides (from the editor UI) vs real data
+			$override_keys = [ 'subject', 'message', 'title', 'subtitle' ];
+
+			if ( is_array( $overrides ) && ! empty( $overrides ) && $this->is_content_overrides( $overrides, $override_keys ) ) {
+				// Content overrides: merge directly into args, keep preview mode
+				foreach ( $override_keys as $key ) {
+					if ( isset( $overrides[ $key ] ) && $overrides[ $key ] !== '' ) {
+						$args[ $key ] = $overrides[ $key ];
+					}
+				}
+			} else {
+				// Real data object: disable preview, process with real values
+				$args['data'] = $overrides;
+				unset( $args['preview'] );
+			}
 		}
 
 		$html = $this->render( $prefix, $template_name, $args );
 
 		return $html === false ? '' : $html;
+	}
+
+	/**
+	 * Check if an array contains only content override keys.
+	 *
+	 * Returns true if every key in the array matches one of the allowed
+	 * override keys, indicating this is an editor content override rather
+	 * than a real data object for tag processing.
+	 *
+	 * @param array $data           The array to check.
+	 * @param array $override_keys  Allowed override key names.
+	 *
+	 * @return bool True if all keys match override keys.
+	 * @since  1.0.0
+	 * @access private
+	 */
+	private function is_content_overrides( array $data, array $override_keys ): bool {
+		foreach ( array_keys( $data ) as $key ) {
+			if ( ! in_array( $key, $override_keys, true ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
