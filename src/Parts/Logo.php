@@ -47,7 +47,7 @@ class Logo extends Component {
 		}
 
 		$img = sprintf(
-			'<img src="%s" alt="%s" style="max-height: 50px; max-width: 200px; width: auto;">',
+			'<img src="%s" alt="%s" style="max-width: 200px; width: auto;">',
 			esc_url( $url ),
 			esc_attr( $alt )
 		);
