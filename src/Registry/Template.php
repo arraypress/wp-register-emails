@@ -110,12 +110,11 @@ class Template {
 	 *
 	 * @since 1.0.0
 	 * @var array {
-	 * @type string $logo         Logo URL
-	 * @type int    $logo_height  Logo height in pixels
-	 * @type string $footer_text  Footer text content
-	 * @type array  $social_links Social media links
-	 * @type array  $colors       Color scheme
-	 *                            }
+	 * @type string|int $logo         Logo URL or attachment ID
+	 * @type string     $footer_text  Footer text content
+	 * @type array      $social_links Social media links
+	 * @type array      $colors       Color scheme
+	 *                                }
 	 */
 	private array $visual_config;
 
@@ -140,7 +139,7 @@ class Template {
 	 * @type string          $description       Template description. Default: empty
 	 * @type string          $template          Visual template. Default: 'default'
 	 * @type string|string[] $tag_groups        Tag group(s). Default: empty. Accepts 'tag_group' (string) or
-	 *       'tag_groups' (array).
+	 *                                          'tag_groups' (array).
 	 * @type callable        $settings_callback Settings retrieval function. Default: null
 	 * @type array           $default_settings  Default settings. Default: see property
 	 * @type array           $visual_config     Visual configuration. Default: see get_default_visual_config()
@@ -183,6 +182,9 @@ class Template {
 		// Merge visual config with defaults
 		$config['visual_config'] = wp_parse_args( $config['visual_config'], $this->get_default_visual_config() );
 
+		// Resolve logo (accepts URL string or attachment ID)
+		$config['visual_config']['logo'] = self::resolve_logo( $config['visual_config']['logo'] );
+
 		// Set properties
 		$this->label             = $config['label'];
 		$this->description       = $config['description'];
@@ -192,6 +194,33 @@ class Template {
 		$this->default_settings  = $config['default_settings'];
 		$this->visual_config     = $config['visual_config'];
 		$this->capability        = $config['capability'];
+	}
+
+	/**
+	 * Resolve a logo value to a URL.
+	 *
+	 * Accepts a URL string, a numeric attachment ID, or an empty value.
+	 * Falls back to the site icon when the input is empty or the
+	 * attachment cannot be resolved.
+	 *
+	 * @param mixed $logo Logo URL string, attachment ID (int or numeric string), or empty.
+	 *
+	 * @return string Resolved logo URL or empty string.
+	 * @since  1.0.0
+	 * @access private
+	 */
+	public static function resolve_logo( $logo ): string {
+		if ( empty( $logo ) ) {
+			$site_icon_id = get_option( 'site_icon' );
+			return $site_icon_id ? wp_get_attachment_url( $site_icon_id ) : '';
+		}
+
+		if ( is_numeric( $logo ) ) {
+			$url = wp_get_attachment_url( (int) $logo );
+			return $url ?: '';
+		}
+
+		return (string) $logo;
 	}
 
 	/**
@@ -205,7 +234,7 @@ class Template {
 	 */
 	private function get_default_visual_config(): array {
 		return [
-			'logo'   => get_site_icon_url() ?: '',
+			'logo'   => '',
 			'footer' => [
 				'text'         => '© {year} {site_name}. All rights reserved.',
 				'links'        => [

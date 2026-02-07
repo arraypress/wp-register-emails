@@ -25,9 +25,11 @@ interface Component {
 	/**
 	 * Render the component
 	 *
+	 * @param array $args Component arguments
+	 *
 	 * @return string Component HTML
 	 * @since 1.0.0
 	 */
-	public static function render(): string;
+	public static function render( array $args = [] ): string;
 
 }
