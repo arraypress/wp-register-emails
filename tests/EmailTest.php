@@ -663,40 +663,11 @@ final class EmailTest extends TestCase {
 		);
 
 		// And that the name is derived rather than being that string.
-		// Unprefixed the two are the same, so asserting the value proves
-		// nothing — this loads the same class under the namespace Strauss
-		// would give it and checks the answer moved.
-		$prefixed = $this->as_prefixed_build();
-
-		$this->assertSame( 'emails_tag_customer_name', Runtime::hook( 'tag_customer_name' ) );
-		$this->assertSame( 'myplugin_emails_tag_customer_name', $prefixed::hook( 'tag_customer_name' ) );
-	}
-
-	/**
-	 * Load Runtime again under the namespace a prefixed build would give it.
-	 *
-	 * Strauss rewrites the namespace and nothing else, so this is exactly
-	 * what a second plugin bundling the library would be running.
-	 *
-	 * @return string The class name.
-	 */
-	private function as_prefixed_build(): string {
-		$prefixed = 'MyPlugin\\ArrayPress\\RegisterEmails\\Utils\\Runtime';
-
-		if ( ! class_exists( $prefixed ) ) {
-			$source = (string) file_get_contents( dirname( __DIR__ ) . '/src/Utils/Runtime.php' );
-
-			$source = str_replace(
-				'namespace ArrayPress\\RegisterEmails\\Utils;',
-				'namespace MyPlugin\\ArrayPress\\RegisterEmails\\Utils;',
-				$source
-			);
-
-			// phpcs:ignore Squiz.PHP.Eval.Discouraged -- loading one class a second time under a different namespace is the thing being tested; there is no other way to have two of it.
-			eval( '?>' . $source );
-		}
-
-		return $prefixed;
+		// Unprefixed the two are identical, so asserting the value proves
+		// nothing — this asks the rule what a prefixed build would produce.
+		$this->assertSame( 'emails', Runtime::prefix_for( 'ArrayPress\\RegisterEmails\\Utils' ) );
+		$this->assertSame( 'myplugin-emails', Runtime::prefix_for( 'MyPlugin\\ArrayPress\\RegisterEmails\\Utils' ) );
+		$this->assertSame( 'edd-fraud-filter-emails', Runtime::prefix_for( 'EDD_Fraud_Filter\\ArrayPress\\RegisterEmails\\Utils' ) );
 	}
 }
 

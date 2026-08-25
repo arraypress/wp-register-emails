@@ -47,8 +47,25 @@ final class Runtime {
 	 * @return string
 	 */
 	public static function prefix(): string {
-		$segments = explode( '\\', __NAMESPACE__ );
-		$root     = $segments[0] ?? '';
+		return self::prefix_for( __NAMESPACE__ );
+	}
+
+	/**
+	 * The prefix a given namespace would produce.
+	 *
+	 * Split out so the rule can be tested. prefix() reads __NAMESPACE__,
+	 * which cannot be changed at runtime — the only way to exercise the
+	 * prefixed case was to eval() a copy of this file under another
+	 * namespace, and eval() refuses the `declare( strict_types=1 )` at the
+	 * top of it on PHP 8.3 and 8.4. That test passed on 8.5 alone, which is
+	 * a test that reports the local PHP version rather than the code.
+	 *
+	 * @param string $under The namespace this class is compiled under, prefixed or not.
+	 *
+	 * @return string
+	 */
+	public static function prefix_for( string $under ): string {
+		$root = explode( '\\', $under )[0] ?? '';
 
 		if ( '' === $root || 'ArrayPress' === $root ) {
 			return self::LIBRARY;
