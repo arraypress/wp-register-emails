@@ -82,10 +82,22 @@ class ActivityLog extends Component {
 
 			// Determine icon and color based on type
 			$type_config = [
-				'info'    => [ 'icon' => '🔵', 'color' => '#3b82f6' ],
-				'warning' => [ 'icon' => '🟡', 'color' => '#f59e0b' ],
-				'error'   => [ 'icon' => '🔴', 'color' => '#ef4444' ],
-				'success' => [ 'icon' => '🟢', 'color' => '#10b981' ],
+				'info'    => [
+					'icon' => '🔵',
+					'color' => '#3b82f6',
+				],
+				'warning' => [
+					'icon' => '🟡',
+					'color' => '#f59e0b',
+				],
+				'error'   => [
+					'icon' => '🔴',
+					'color' => '#ef4444',
+				],
+				'success' => [
+					'icon' => '🟢',
+					'color' => '#10b981',
+				],
 			];
 
 			$config  = $type_config[ $type ] ?? $type_config['info'];
@@ -147,5 +159,4 @@ class ActivityLog extends Component {
 
 		return $html;
 	}
-
 }

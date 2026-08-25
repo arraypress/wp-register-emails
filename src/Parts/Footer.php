@@ -77,9 +77,12 @@ class Footer extends Component {
 
 		// Footer text
 		if ( ! empty( $text ) ) {
+			// The site's year, not the server's. A copyright line that says
+			// last year for the first few hours of the new one is a small
+			// thing that looks like nobody is home.
 			$text = str_replace(
 				[ '{year}', '{site_name}' ],
-				[ date( 'Y' ), get_bloginfo( 'name' ) ],
+				[ (string) current_time( 'Y' ), get_bloginfo( 'name' ) ],
 				$text
 			);
 			$html .= '<p style="margin: 0;">' . wp_kses_post( $text ) . '</p>';
@@ -89,5 +92,4 @@ class Footer extends Component {
 
 		return $html;
 	}
-
 }

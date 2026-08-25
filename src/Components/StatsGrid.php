@@ -64,12 +64,11 @@ class StatsGrid extends Component {
 			}
 
 			$html .= '</td>';
-			$count ++;
+			++$count;
 		}
 
 		$html .= '</tr></table></div>';
 
 		return $html;
 	}
-
 }

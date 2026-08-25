@@ -48,7 +48,7 @@ class DownloadsList extends Component {
 		$index = 0;
 
 		foreach ( $downloads as $product ) {
-			$index ++;
+			++$index;
 			$is_last = ( $index === $total );
 
 			// Only add border if not the last item AND there's more than one item
@@ -92,5 +92,4 @@ class DownloadsList extends Component {
 
 		return $html;
 	}
-
 }

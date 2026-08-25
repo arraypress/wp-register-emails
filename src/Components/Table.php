@@ -84,7 +84,7 @@ class Table extends Component {
 				$style = 'padding: 12px;';
 
 				// Alignment
-				$align = $alignments[$col_index] ?? 'left';
+				$align = $alignments[ $col_index ] ?? 'left';
 				$style .= ' text-align: ' . $align . ';';
 				$cell_classes .= ' align-' . $align;
 
@@ -116,16 +116,15 @@ class Table extends Component {
 					$tag
 				);
 
-				$col_index++;
+				++$col_index;
 			}
 
 			$html .= '</tr>';
-			$row_index++;
+			++$row_index;
 		}
 
 		$html .= '</table>';
 
 		return $html;
 	}
-
 }

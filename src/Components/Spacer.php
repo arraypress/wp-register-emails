@@ -50,4 +50,18 @@ class Spacer extends Component {
 		);
 	}
 
+
+	/**
+	 * What a tag's callback is understood to be giving when it returns a
+	 * string rather than an array.
+	 *
+	 * Declared here rather than in a table somewhere else: this class is the
+	 * only thing that knows, and a table of twenty-one of these is twenty-one
+	 * chances to add a component and forget one of them.
+	 *
+	 * @return string
+	 */
+	public static function primary_key(): string {
+		return 'height';
+	}
 }

@@ -86,7 +86,7 @@ class Templates {
 	 */
 	private static function get_templates_dir(): string {
 		if ( empty( self::$templates_dir ) ) {
-			self::$templates_dir = dirname( __FILE__, 2 ) . '/templates/';
+			self::$templates_dir = dirname( __DIR__, 1 ) . '/templates/';
 
 		}
 
@@ -287,5 +287,4 @@ class Templates {
 </body>
 </html>';
 	}
-
 }

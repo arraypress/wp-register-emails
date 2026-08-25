@@ -166,5 +166,4 @@ class OrderItems extends Component {
 
 		return $html;
 	}
-
 }

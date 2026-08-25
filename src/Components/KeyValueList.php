@@ -59,5 +59,4 @@ class KeyValueList extends Component {
 
 		return $html;
 	}
-
 }

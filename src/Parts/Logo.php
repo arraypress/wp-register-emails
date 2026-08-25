@@ -58,5 +58,4 @@ class Logo extends Component {
 
 		return $img;
 	}
-
 }

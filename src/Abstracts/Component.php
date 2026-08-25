@@ -46,5 +46,24 @@ abstract class Component implements ComponentInterface {
 
 		return sprintf( 'rgba(%d, %d, %d, %s)', $r, $g, $b, $alpha );
 	}
-
+	/**
+	 * What a tag's callback is giving when it returns a string rather than
+	 * an array.
+	 *
+	 * Nothing, unless the component says otherwise. A component with an
+	 * obvious single argument — the text of a button, the message of an
+	 * alert — names it and a bare string goes there.
+	 *
+	 * Everything else takes a list, and there is no single value that could
+	 * mean a table of order lines. Tag refuses a bare string for those and
+	 * says so, rather than putting the string in the argument a list belongs
+	 * in and leaving the component to iterate over a word — which rendered
+	 * half a table with a PHP warning in the middle of the email, and sent
+	 * it.
+	 *
+	 * @return string
+	 */
+	public static function primary_key(): string {
+		return '';
+	}
 }

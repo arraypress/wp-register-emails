@@ -1,296 +1,183 @@
-# WordPress Email Registration System
+# Register Emails
 
-A declarative email system for WordPress that combines dynamic tags, component-based templates, and a simple registration API. Build professional transactional emails with 21+ components and automatic tag processing.
+Merge tags, HTML email components and named transactional emails for a
+WordPress plugin.
 
-## Features
-
-* **Tag-Based System**: Register dynamic placeholders that get replaced with real data
-* **21+ Email Components**: Buttons, tables, invoices, shipping trackers, subscription status, and more
-* **7 Professional Templates**: Default, invoice, notification, dark mode, and more
-* **Smart Currency Handling**: Automatic formatting for all Stripe currencies
-* **Theme Override Support**: Customize templates via your WordPress theme
-
-## Installation
+## Install
 
 ```bash
 composer require arraypress/wp-register-emails
 ```
 
-## Quick Start
+Requires PHP 8.3.
 
-### 1. Register Tags (Dynamic Content)
+## Use
+
+Register the tags an email can use:
 
 ```php
-// Text replacement
 register_email_tag( 'shop', 'customer_name', [
-	'type'     => 'text',
-	'label'    => 'Customer Name',
-	'callback' => fn( $order ) => $order->billing_name
+	'label'    => __( 'Customer name', 'my-plugin' ),
+	'callback' => fn( $order ) => $order->billing_name,
+	'preview'  => 'Jane Doe',
 ] );
 
-// Button component
-register_email_tag( 'shop', 'view_order_btn', [
+register_email_tag( 'shop', 'view_order', [
 	'type'     => 'button',
-	'label'    => 'View Order Button',
+	'label'    => __( 'View order button', 'my-plugin' ),
 	'callback' => fn( $order ) => [
-		'text' => 'View Order #' . $order->id,
-		'url'  => 'https://example.com/order/' . $order->id
-	]
-] );
-
-// Invoice table with currency
-register_email_tag( 'shop', 'invoice', [
-	'type'     => 'order_items',
-	'callback' => fn( $order ) => [
-		'items'    => [
-			[ 'name' => 'Premium Plugin', 'quantity' => 1, 'price' => 9900 ]
-		],
-		'tax'      => 990,
-		'shipping' => 500,
-		'currency' => 'USD'
-	]
+		'text' => __( 'View your order', 'my-plugin' ),
+		'url'  => $order->url(),
+	],
 ] );
 ```
 
-### 2. Register Templates
+Register the email:
 
 ```php
-register_email_template( 'shop', 'order_confirmation', [
-	'label'    => 'Order Confirmation',
-	'subject'  => 'Order #{order_id} Confirmed',
-	'template' => 'invoice',  // Visual template
-	'message'  => '
-        <p>Hi {customer_name},</p>
-        <p>Thank you for your order!</p>
-        {invoice}
-        {view_order_btn}
-    '
+register_email( 'shop', 'order_confirmation', [
+	'label'    => __( 'Order confirmation', 'my-plugin' ),
+	'subject'  => __( 'Order {order_id} confirmed', 'my-plugin' ),
+	'content'  => '<p>' . __( 'Thanks, {customer_name}.', 'my-plugin' ) . '</p>{view_order}',
+	'settings' => fn() => get_option( 'myplugin_order_email', [] ),
 ] );
 ```
 
-### 3. Send Emails
+Send it:
 
 ```php
-send_email_template( 'shop', 'order_confirmation', [
-	'to'   => 'customer@example.com',
-	'data' => $order
+$sent = send_registered_email( 'shop', 'order_confirmation', [
+	'to'   => $order->email,
+	'data' => $order,
 ] );
+
+if ( is_wp_error( $sent ) ) {
+	// It did not go, and this says why.
+}
 ```
 
-## Available Components
-
-### Commerce & Orders
-```php
-// Invoice with totals
-register_email_tag( 'shop', 'invoice', [
-	'type'     => 'order_items',
-	'callback' => fn( $order ) => [
-		'items'    => [ ... ],
-		'currency' => 'USD',
-		'tax'      => 1000,
-		'discount' => 500
-	]
-] );
-
-// Shipping tracker
-register_email_tag( 'shop', 'tracking', [
-	'type'     => 'shipping_tracker',
-	'callback' => fn( $order ) => [
-		'carrier'         => 'FedEx',
-		'tracking_number' => '123456789',
-		'status'          => 'In Transit',
-		'steps'           => [
-			[ 'label' => 'Shipped', 'completed' => true ],
-			[ 'label' => 'In Transit', 'completed' => false ]
-		]
-	]
-] );
-
-// Subscription status
-register_email_tag( 'shop', 'subscription', [
-	'type'     => 'subscription_status',
-	'callback' => fn( $user ) => [
-		'plan'              => 'Premium',
-		'status'            => 'Active',
-		'amount'            => 9900,
-		'currency'          => 'USD',
-		'next_billing_date' => '2025-02-01'
-	]
-] );
-```
-
-### Content & Display
-```php
-// Alert boxes
-register_email_tag( 'system', 'warning', [
-	'type'     => 'alert',
-	'callback' => fn() => [
-		'message' => 'Payment method expires soon',
-		'type'    => 'warning'  // success|error|warning|info
-	]
-] );
-
-// Progress bars
-register_email_tag( 'system', 'progress', [
-	'type'     => 'progress_bar',
-	'callback' => fn( $data ) => [
-		'current' => $data->completed,
-		'total'   => $data->total,
-		'label'   => 'Processing'
-	]
-] );
-
-// Stats grid
-register_email_tag( 'metrics', 'stats', [
-	'type'     => 'stats_grid',
-	'callback' => fn() => [
-		'stats' => [
-			[ 'value' => '1,234', 'label' => 'Orders' ],
-			[ 'value' => '$12,345', 'label' => 'Revenue' ],
-			[ 'value' => '98%', 'label' => 'Satisfaction' ]
-		]
-	]
-] );
-```
-
-## WooCommerce Example
+Or build one without registering anything:
 
 ```php
-add_action( 'init', function () {
-	// Register tags
-	register_email_tag( 'woo', 'order_number', [
-		'type'     => 'text',
-		'callback' => fn( $order ) => $order->get_order_number()
-	] );
-
-	register_email_tag( 'woo', 'order_table', [
-		'type'     => 'order_items',
-		'callback' => function ( $order ) {
-			$items = [];
-			foreach ( $order->get_items() as $item ) {
-				$items[] = [
-					'name'     => $item->get_name(),
-					'quantity' => $item->get_quantity(),
-					'price'    => $item->get_total() * 100 // Convert to cents
-				];
-			}
-
-			return [
-				'items'    => $items,
-				'tax'      => $order->get_total_tax() * 100,
-				'shipping' => $order->get_shipping_total() * 100,
-				'currency' => $order->get_currency()
-			];
-		}
-	] );
-
-	// Register template
-	register_email_template( 'woo', 'order_confirmation', [
-		'label'    => 'Order Confirmation',
-		'subject'  => 'Order #{order_number} Received',
-		'template' => 'invoice',
-		'message'  => '
-            <h2>Thank you for your order!</h2>
-            <p>Order #{order_number} has been received.</p>
-            {order_table}
-            <p>We will notify you when it ships.</p>
-        '
-	] );
-} );
-
-// Send on order placement
-add_action( 'woocommerce_thankyou', function ( $order_id ) {
-	send_email_template( 'woo', 'order_confirmation', [
-		'to'   => $order->get_billing_email(),
-		'data' => wc_get_order( $order_id )
-	] );
-} );
+compose_email()
+	->to( $customer->email )
+	->subject( __( 'Your download is ready', 'my-plugin' ) )
+	->content( '<p>{download_link}</p>' )
+	->tags( 'shop' )
+	->about( $order )
+	->send();
 ```
 
-## Templates
+## Letting people edit them
 
-| Template | Description | Best For |
-|----------|-------------|----------|
-| `default` | Clean with colored header | Welcome emails, marketing |
-| `invoice` | Minimal Apple-inspired | Receipts, confirmations |
-| `notification` | Simple bordered | System alerts |
-| `plain` | Text-focused | Technical emails |
-| `dark` | Dark mode | Modern apps |
-| `soft` | Gentle gradients | SaaS products |
-| `mono` | Black & white | Formal notices |
+`settings` is a callback returning whatever the site owner has configured —
+`subject`, `content`, `enabled`, `context`. It wins over the defaults
+registered above, and an override passed at the call site wins over both.
 
-### Custom Templates
+So the plugin author writes the email once and the site owner edits it,
+without either having to know about the other. An email they turned off is
+not sent and is not an error: it is a setting, and reporting it as a failure
+fills a log with somebody's preference.
 
-Place templates in your theme:
-```
-/wp-content/themes/your-theme/register-emails/custom.html
-```
+## The merge-tag chooser
 
-## All Components
+This library owns the tags. [wp-field-kit](https://github.com/arraypress/wp-field-kit)'s
+`email_editor` field draws the chooser and knows nothing about what any tag
+means, so one function is the whole seam between them:
 
-* **Text**: `text`, `raw_html`, `divider`, `spacer`
-* **Interactive**: `button`, `alert`, `info_box`, `coupon`
-* **Data**: `table`, `order_items`, `key_value_list`, `stats_grid`, `progress_bar`
-* **Commerce**: `product_list`, `downloads_list`, `shipping_tracker`, `subscription_status`
-* **User**: `activity_log`, `event_details`, `reward_balance`, `testimonial`
-
-## Global Tags
-
-Always available in any template:
-* `{site_name}` - WordPress site name
-* `{site_url}` - Site URL
-* `{admin_email}` - Admin email
-* `{year}` - Current year
-* `{date}` - Current date
-
-## Advanced Features
-
-### Tag Groups
 ```php
-// Register tags to multiple groups
-register_email_tag( 'shop', 'price', [
-	'type'     => 'text',
-	'groups'   => [ 'invoices', 'quotes' ],  // Available in multiple contexts
-	'callback' => fn( $data ) => format_currency( $data->amount, $data->currency )
-] );
+'body' => [
+	'type'  => 'email_editor',
+	'label' => __( 'Order confirmation', 'my-plugin' ),
+	'tags'  => email_tags_for_editor( [ 'shop' ] ),
+],
 ```
 
-### Preview Mode
-```php
-// Generate preview with sample data
-$html = preview_email_template( 'shop', 'order_confirmation' );
+## Tag options
 
-// Preview with specific data
-$html = preview_email_template( 'shop', 'order_confirmation', $sample_order );
+| Option        | What it does                                                  |
+| ------------- | -------------------------------------------------------------- |
+| `label`       | What the chooser calls it.                                      |
+| `description` | A line under it in the chooser.                                 |
+| `type`        | `text`, or the name of a component.                             |
+| `callback`    | Given whatever the email is about; returns the value.           |
+| `options`     | Component arguments the callback does not supply.               |
+| `preview`     | What to show when there is no real data. A string or an array.  |
+
+A tag whose `type` names a component draws that instead of putting in a word,
+and its callback returns the component's arguments. A callback returning a
+bare string fills the component's main argument — the text of a button, the
+message of an alert. A component whose main argument is a *list* has no such
+value, and says so: the callback has to return an array, and gets an error
+naming the tag if it does not.
+
+## Components
+
+`activity_log`, `alert`, `button`, `code_block`, `coupon`, `divider`,
+`downloads_list`, `event_details`, `info_box`, `key_value_list`,
+`order_items`, `product_list`, `progress_bar`, `raw_html`, `reward_balance`,
+`shipping_tracker`, `spacer`, `stats_grid`, `subscription_status`, `table`,
+`testimonial`.
+
+One of your own is a class implementing the `Component` interface, added
+through the `emails_components` filter. It says what it draws and what its
+main argument is called; nothing else has to be told about it.
+
+## What it gets right
+
+**A tag that fails does not become a blank.** It used to be caught, written to
+the error log and replaced with an empty string — in two places — so a
+customer received an order confirmation with a gap where the total should be
+and the only record was a line in a file nobody reads. Failures are collected,
+`send()` refuses, and the caller is told which tag and why. An email that
+never arrives is recoverable; that one is not.
+
+**A tag nobody registered does not go out looking like a tag.** `Hi
+{customer_name}` reaching a customer exactly like that is the most
+recognisable email bug there is. Unknown tags are removed, and listed.
+
+**A component knows its own arguments.** There were three hand-maintained
+lists that had to agree — type to class, which types were components, and each
+one's main argument — so adding a component meant editing three places and
+forgetting one gave a component that rendered as nothing, or a callback whose
+output was ignored, or a string in the argument a list belonged in. That last
+one made an order-items table iterate over a word: half a table, a PHP warning
+in the middle of the email, and it still sent.
+
+**Only the tags an email uses are asked for.** A site with four hundred
+registered tags ran four hundred `str_contains()` over every email.
+
+**Header values never carry a line break.** Not because it would inject one —
+PHPMailer refuses a custom header containing CR or LF and strips them out of
+names and subjects, so nothing lands. It refuses by throwing, which
+`wp_mail()` reports as a plain `false`: the email silently does not go.
+
+**Two plugins can both bundle this.** The filters are named after the tag they
+filter, and the name used to be `email_template_tag_{name}` for everybody — so
+one plugin's callback rewrote the other's order confirmation. The names carry
+the build's own prefix now, derived from the namespace Strauss rewrites.
+
+**The year is the site's, not the server's.** A copyright line that says last
+year for the first few hours of the new one is a small thing that looks like
+nobody is home.
+
+## Upgrading from 1.x
+
+**`send_email_template()` is `send_registered_email()`** and returns
+`true|WP_Error` rather than a bare bool.
+
+**`register_email_template()` is `register_email()`.** Its `tag_groups` and
+`settings_callback` are `tag_groups` and `settings`.
+
+**The singleton is gone.** `Tags` and `Emails` are plain static registries;
+`Registry::get_instance()` has no replacement because it has no job.
+
+**`arraypress/wp-currencies` is a suggestion**, not a requirement.
+
+## Testing
+
+```bash
+composer test          # phpunit
+composer lint          # phpcs, defect sniffs
+composer format:check  # phpcs, formatting
 ```
-
-### Settings Integration
-```php
-register_email_template( 'shop', 'welcome', [
-	'settings_callback' => function () {
-		// Pull from your settings
-		return [
-			'enabled' => get_option( 'welcome_email_enabled' ),
-			'subject' => get_option( 'welcome_email_subject' ),
-			'message' => get_option( 'welcome_email_content' )
-		];
-	},
-	'default_settings'  => [
-		'subject' => 'Welcome to {site_name}!',
-		'message' => 'Thank you for joining us.'
-	]
-] );
-```
-
-## Requirements
-
-- PHP 7.4 or later
-- WordPress 5.0 or later
-
-## License
-
-GPL-2.0-or-later
-
-## Credits
-
-Created by [David Sherlock](https://davidsherlock.com) at [ArrayPress](https://arraypress.com)

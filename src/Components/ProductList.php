@@ -138,5 +138,4 @@ class ProductList extends Component {
 
 		return $html;
 	}
-
 }
