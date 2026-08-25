@@ -19,8 +19,8 @@
     "wp-coding-standards/wpcs": "^3.4"
   },
   "suggest": {
-    "arraypress/wp-currencies": "Formats an amount in the currency an order was placed in.",
-    "arraypress/wp-field-kit": "Its email_editor field draws the merge-tag chooser; email_tags_for_editor() feeds it."
+    "arraypress/wp-field-kit": "Its email_editor field draws the merge-tag chooser; email_tags_for_editor() feeds it.",
+    "arraypress/wp-money": "Formats an amount in the currency an order was placed in."
   },
   "autoload": {
     "psr-4": {
