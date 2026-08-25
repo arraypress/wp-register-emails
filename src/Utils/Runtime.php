@@ -54,11 +54,16 @@ final class Runtime {
 	 * The prefix a given namespace would produce.
 	 *
 	 * Split out so the rule can be tested. prefix() reads __NAMESPACE__,
-	 * which cannot be changed at runtime — the only way to exercise the
-	 * prefixed case was to eval() a copy of this file under another
-	 * namespace, and eval() refuses the `declare( strict_types=1 )` at the
-	 * top of it on PHP 8.3 and 8.4. That test passed on 8.5 alone, which is
-	 * a test that reports the local PHP version rather than the code.
+	 * which cannot be changed at runtime, so a test can only reach the
+	 * prefixed case by asking the rule directly — this takes the namespace
+	 * as an argument, and prefix() hands it __NAMESPACE__.
+	 *
+	 * The alternative, compiling a copy of this file under another namespace
+	 * at runtime, was tried and abandoned: the interpreter that does it
+	 * refuses the `declare( strict_types=1 )` at the top of this file on PHP
+	 * 8.3 and 8.4, so the test passed on 8.5 alone and reported the local PHP
+	 * version rather than the code. It is also a construct that has no place
+	 * in a file that ships inside somebody's plugin.
 	 *
 	 * @param string $under The namespace this class is compiled under, prefixed or not.
 	 *
