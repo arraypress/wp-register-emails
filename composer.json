@@ -10,7 +10,8 @@
     }
   ],
   "require": {
-    "php": ">=8.3"
+    "php": ">=8.3",
+    "arraypress/wp-money": "^1.0"
   },
   "require-dev": {
     "phpcompatibility/phpcompatibility-wp": "^2.1",

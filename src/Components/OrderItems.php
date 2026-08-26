@@ -86,8 +86,8 @@ class OrderItems extends Component {
 				</tr>',
 				esc_html( $name ),
 				esc_html( (string) $quantity ),
-				format_currency( $price, $currency ),
-				format_currency( $total, $currency )
+				format_money( $price, [ 'currency' => $currency ] ),
+				format_money( $total, [ 'currency' => $currency ] )
 			);
 		}
 
@@ -104,7 +104,7 @@ class OrderItems extends Component {
 				<td colspan="3" class="order-label" style="padding: 8px 8px 4px; text-align: right; color: #6b7280; font-size: 13px;">Subtotal:</td>
 				<td class="order-value" style="padding: 8px 8px 4px; text-align: right; color: #374151;">%s</td>
 			</tr>',
-			format_currency( $subtotal, $currency )
+			format_money( $subtotal, [ 'currency' => $currency ] )
 		);
 
 		// Track running total for calculations
@@ -119,7 +119,7 @@ class OrderItems extends Component {
 					<td colspan="3" class="order-label" style="padding: 4px 8px; text-align: right; color: #6b7280; font-size: 13px;">Discount:</td>
 					<td class="order-value order-discount" style="padding: 4px 8px; text-align: right; color: #059669;">-%s</td>
 				</tr>',
-				format_currency( $discount, $currency )
+				format_money( $discount, [ 'currency' => $currency ] )
 			);
 			$running_total -= $discount;
 		}
@@ -133,7 +133,7 @@ class OrderItems extends Component {
 					<td colspan="3" class="order-label" style="padding: 4px 8px; text-align: right; color: #6b7280; font-size: 13px;">Shipping:</td>
 					<td class="order-value" style="padding: 4px 8px; text-align: right; color: #374151;">%s</td>
 				</tr>',
-				format_currency( $shipping, $currency )
+				format_money( $shipping, [ 'currency' => $currency ] )
 			);
 			$running_total += $shipping;
 		}
@@ -146,7 +146,7 @@ class OrderItems extends Component {
 					<td colspan="3" class="order-label" style="padding: 4px 8px; text-align: right; color: #6b7280; font-size: 13px;">Tax:</td>
 					<td class="order-value" style="padding: 4px 8px; text-align: right; color: #374151;">%s</td>
 				</tr>',
-				format_currency( $tax, $currency )
+				format_money( $tax, [ 'currency' => $currency ] )
 			);
 			$running_total += $tax;
 		}
@@ -159,7 +159,7 @@ class OrderItems extends Component {
 				<td colspan="3" class="order-total-label" style="padding: 12px 8px 8px; text-align: right; font-weight: 700; color: #111827; font-size: 16px;">Total:</td>
 				<td class="order-total-value" style="padding: 12px 8px 8px; text-align: right; font-weight: 700; color: #111827; font-size: 16px;">%s</td>
 			</tr>',
-			format_currency( $total, $currency )
+			format_money( $total, [ 'currency' => $currency ] )
 		);
 
 		$html .= '</tfoot></table>';

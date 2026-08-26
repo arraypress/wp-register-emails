@@ -90,8 +90,8 @@ class SubscriptionStatus extends Component {
 		$html .= '<div class="subscription-billing" style="margin-bottom: 20px;">';
 
 		// Format amount using wp-currencies if available
-		if ( function_exists( 'format_currency' ) && $amount > 0 ) {
-			$amount_display = format_currency( $amount, $currency );
+		if ( function_exists( 'format_money' ) && $amount > 0 ) {
+			$amount_display = format_money( $amount, [ 'currency' => $currency ] );
 		} elseif ( $amount > 0 ) {
 			$amount_display = '$' . number_format( $amount / 100, 2 );
 		} else {
