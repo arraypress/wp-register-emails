@@ -23,6 +23,13 @@ use WP_Error;
  * `{customer_name}` is a tag; so is `{invoice}`, which happens to render a
  * table rather than a word. The difference is only what the callback gives
  * back and which component draws it.
+ *
+ * Its `type` says which. `text`, the default, is a word — a name, an amount,
+ * a date — and it goes into the email as a word: a billing name with a `<b>`
+ * in it reads as one, rather than being rendered as markup by every mail
+ * client that shows the receipt. `html` is markup the callback built itself,
+ * and is trusted as it is. Anything else names a component, which draws what
+ * the callback returns as its arguments.
  */
 final class Tag {
 
@@ -178,7 +185,13 @@ final class Tag {
 	}
 
 	/**
-	 * Fill in a tag that is a word.
+	 * Fill in a tag that is a word, or markup the callback built itself.
+	 *
+	 * A word is escaped. What a text tag's callback returns is very often
+	 * what a customer typed — the billing name, the note on the order — and
+	 * it used to go straight into the markup, so a customer who put a tag in
+	 * their name put a tag in the shop's email. A tag whose type is `html`
+	 * has said its callback returns markup, and that goes in as it is.
 	 *
 	 * @param mixed $data Whatever the email is about.
 	 *
@@ -190,8 +203,9 @@ final class Tag {
 		}
 
 		$value = call_user_func( $this->config['callback'], $data );
+		$value = is_scalar( $value ) ? (string) $value : '';
 
-		return is_scalar( $value ) ? (string) $value : '';
+		return 'html' === (string) $this->config['type'] ? $value : esc_html( $value );
 	}
 
 	/**

@@ -68,7 +68,7 @@ final class Emails {
 				'tag_groups'  => [ $group ],
 
 				// Returns what the site owner has configured: subject,
-				// content, enabled, and anything the template shows.
+				// content, to, enabled, and anything the template shows.
 				'settings'    => null,
 			],
 			$config
@@ -113,41 +113,10 @@ final class Emails {
 		$config = self::get( $group, $name );
 
 		if ( null === $config ) {
-			return new WP_Error(
-				'no_such_email',
-				sprintf(
-					/* translators: 1: an email's name, 2: the group it was looked for in. */
-					__( 'There is no email called %1$s registered for %2$s.', 'arraypress' ),
-					$name,
-					$group
-				)
-			);
+			return self::unknown( $group, $name );
 		}
 
-		$settings = is_callable( $config['settings'] ) ? (array) call_user_func( $config['settings'] ) : [];
-
-		// The site owner's version wins over the plugin author's default, and
-		// an override given at the call site wins over both — that is the one
-		// the code sending it chose deliberately.
-		$subject = (string) ( $overrides['subject'] ?? $settings['subject'] ?? $config['subject'] );
-		$content = (string) ( $overrides['content'] ?? $settings['content'] ?? $config['content'] );
-
-		$email = Email::make()
-			->subject( $subject )
-			->content( $content )
-			->template( (string) ( $settings['template'] ?? $config['template'] ) )
-			->tags( (array) $config['tag_groups'] )
-			->context( array_merge( (array) $config['context'], (array) ( $settings['context'] ?? [] ), (array) ( $overrides['context'] ?? [] ) ) );
-
-		if ( isset( $overrides['to'] ) ) {
-			$email->to( $overrides['to'] );
-		}
-
-		if ( array_key_exists( 'data', $overrides ) ) {
-			$email->about( $overrides['data'] );
-		}
-
-		return $email;
+		return self::build( $config, self::settings( $config ), $overrides );
 	}
 
 	/**
@@ -162,20 +131,20 @@ final class Emails {
 	public static function send( string $group, string $name, array $overrides = [] ): true|WP_Error {
 		$config = self::get( $group, $name );
 
-		if ( null !== $config && is_callable( $config['settings'] ) ) {
-			$settings = (array) call_user_func( $config['settings'] );
-
-			// Turned off by the site owner. Not an error — it is a setting,
-			// and reporting it as a failure would fill a log with somebody's
-			// preference.
-			if ( array_key_exists( 'enabled', $settings ) && ! $settings['enabled'] ) {
-				return true;
-			}
+		if ( null === $config ) {
+			return self::unknown( $group, $name );
 		}
 
-		$email = self::compose( $group, $name, $overrides );
+		$settings = self::settings( $config );
 
-		return $email instanceof WP_Error ? $email : $email->send();
+		// Turned off by the site owner. Not an error — it is a setting, and
+		// reporting it as a failure would fill a log with somebody's
+		// preference.
+		if ( array_key_exists( 'enabled', $settings ) && ! $settings['enabled'] ) {
+			return true;
+		}
+
+		return self::build( $config, $settings, $overrides )->send();
 	}
 
 	/**
@@ -208,5 +177,80 @@ final class Emails {
 		}
 
 		unset( self::$emails[ sanitize_key( $group ) ] );
+	}
+
+	/**
+	 * What the site owner has configured for one email.
+	 *
+	 * Asked once per send. It used to be asked twice — once to see whether
+	 * the email was turned on, and again to build it — which is nothing for
+	 * a callback that reads an option and something for one that runs a
+	 * query.
+	 *
+	 * @param array<string, mixed> $config The registered email.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private static function settings( array $config ): array {
+		return is_callable( $config['settings'] ) ? (array) call_user_func( $config['settings'] ) : [];
+	}
+
+	/**
+	 * Put one together from its registration, its settings and the call.
+	 *
+	 * @param array<string, mixed> $config    The registered email.
+	 * @param array<string, mixed> $settings  What the site owner configured.
+	 * @param array<string, mixed> $overrides to, subject, content, context, data.
+	 *
+	 * @return Email
+	 */
+	private static function build( array $config, array $settings, array $overrides ): Email {
+		// The site owner's version wins over the plugin author's default, and
+		// an override given at the call site wins over both — that is the one
+		// the code sending it chose deliberately.
+		$subject = (string) ( $overrides['subject'] ?? $settings['subject'] ?? $config['subject'] );
+		$content = (string) ( $overrides['content'] ?? $settings['content'] ?? $config['content'] );
+
+		$email = Email::make()
+			->subject( $subject )
+			->content( $content )
+			->template( (string) ( $settings['template'] ?? $config['template'] ) )
+			->tags( (array) $config['tag_groups'] )
+			->context( array_merge( (array) $config['context'], (array) ( $settings['context'] ?? [] ), (array) ( $overrides['context'] ?? [] ) ) );
+
+		// The same order for the recipient. A receipt goes to whoever the
+		// call names; a sale notification goes to whoever the site owner
+		// typed into the settings screen.
+		if ( isset( $overrides['to'] ) ) {
+			$email->to( $overrides['to'] );
+		} elseif ( isset( $settings['to'] ) ) {
+			$email->to( $settings['to'] );
+		}
+
+		if ( array_key_exists( 'data', $overrides ) ) {
+			$email->about( $overrides['data'] );
+		}
+
+		return $email;
+	}
+
+	/**
+	 * The error for an email nobody registered.
+	 *
+	 * @param string $group The group it was looked for in.
+	 * @param string $name  Its name.
+	 *
+	 * @return WP_Error
+	 */
+	private static function unknown( string $group, string $name ): WP_Error {
+		return new WP_Error(
+			'no_such_email',
+			sprintf(
+				/* translators: 1: an email's name, 2: the group it was looked for in. */
+				__( 'There is no email called %1$s registered for %2$s.', 'arraypress' ),
+				$name,
+				$group
+			)
+		);
 	}
 }

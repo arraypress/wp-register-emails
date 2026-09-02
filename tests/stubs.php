@@ -117,6 +117,37 @@ if ( ! function_exists( 'esc_html__' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_strip_all_tags' ) ) {
+	function wp_strip_all_tags( $text, $remove_breaks = false ) {
+		$text = preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $text ) ?? '';
+		$text = strip_tags( $text );
+
+		return trim( $remove_breaks ? (string) preg_replace( '/[\r\n\t ]+/', ' ', $text ) : $text );
+	}
+}
+
+if ( ! function_exists( 'wp_specialchars_decode' ) ) {
+	function wp_specialchars_decode( $text, $quote_style = ENT_NOQUOTES ) {
+		return htmlspecialchars_decode( (string) $text, (int) $quote_style );
+	}
+}
+
+/*
+ * Core's, minus the accent and mime handling: the special characters go, a
+ * run of dots collapses to one, and the ends are trimmed of dots and dashes.
+ */
+if ( ! function_exists( 'sanitize_file_name' ) ) {
+	function sanitize_file_name( $filename ) {
+		$special = [ '?', '[', ']', '/', '\\', '=', '<', '>', ':', ';', ',', "'", '"', '&', '$', '#', '*', '(', ')', '|', '~', '`', '!', '{', '}', '%', '+', chr( 0 ) ];
+
+		$filename = str_replace( $special, '', (string) $filename );
+		$filename = (string) preg_replace( '/\.{2,}/', '.', $filename );
+		$filename = (string) preg_replace( '/[\r\n\t -]+/', '-', $filename );
+
+		return trim( $filename, '.-_' );
+	}
+}
+
 /*
  * A theme may override an email template. Nothing here has a theme, so these
  * point at a directory that does not exist and the shipped template wins.

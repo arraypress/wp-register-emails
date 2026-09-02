@@ -19,8 +19,8 @@ use WP_Error;
 /**
  * One email, built and sent.
  *
- * Two things here are not obvious and both are about not sending something
- * wrong.
+ * Three things here are not obvious and all of them are about not sending
+ * something wrong.
  *
  * **A header value never contains a line break.** Every part that goes into a
  * header is cleaned of CR and LF as it is set. On a current WordPress this is
@@ -33,8 +33,26 @@ use WP_Error;
  * catch the failure, write it to the error log and put an empty string in,
  * so a customer received an order confirmation with a blank where the total
  * should be. Sending nothing is recoverable; sending that is not.
+ *
+ * **What goes into the template goes in as text.** A title sits inside an
+ * `<h1>`, and one built from a customer's name went in as whatever the name
+ * had in it. Only the body, the logo and the footer are markup by contract.
+ * The subject is filled in from the same tags as the body — it used to reach
+ * the customer as typed, `{site_name}` and all — and being a header it is
+ * filled in as words on one line, not as markup.
  */
 final class Email {
+
+	/**
+	 * The template placeholders that take markup.
+	 *
+	 * The body, and the logo and footer the Parts draw. Everything else a
+	 * template asks for is a word inside an element — the title in an
+	 * `<h1>`, the subject in a `<title>` — and goes in escaped.
+	 *
+	 * @var string[]
+	 */
+	private const MARKUP = [ 'content', 'logo', 'footer' ];
 
 	/**
 	 * Who it goes to.
@@ -44,11 +62,18 @@ final class Email {
 	private array $to = [];
 
 	/**
-	 * Its subject.
+	 * Its subject, before the tags are filled in.
 	 *
 	 * @var string
 	 */
 	private string $subject = '';
+
+	/**
+	 * Its subject as it goes out, from the last build.
+	 *
+	 * @var string
+	 */
+	private string $resolved_subject = '';
 
 	/**
 	 * Its body, before the tags are filled in.
@@ -202,6 +227,11 @@ final class Email {
 	/**
 	 * What goes in the template's own placeholders.
 	 *
+	 * Words, and inserted as words: `title` and `subtitle` are escaped on
+	 * the way in, as is anything else a template asks for. `footer` and
+	 * `logo` are markup — the Parts draw them — and go in as they are, the
+	 * same as the body.
+	 *
 	 * @param array<string, string> $context title, subtitle, footer and the rest.
 	 *
 	 * @return self
@@ -301,11 +331,20 @@ final class Email {
 	public function html(): string {
 		$processor = new Processor( $this->groups );
 
+		// The subject takes the same tags as the body — `Your order from
+		// {site_name}` is the first example in the README — and used to be
+		// sent as typed, because only the body was filled in. It is a
+		// header: what a tag returns goes in as words, on one line.
+		$this->resolved_subject = self::one_line( $processor->plain( $this->subject, $this->data ) );
+
+		// Kept before the body runs, because a run starts a fresh report.
+		$problems = $processor->problems();
+
 		$body = $processor->process( $this->content, $this->data );
 
-		$this->problems = $processor->problems();
+		$this->problems = array_merge( $problems, $processor->problems() );
 
-		return $this->wrap( $body, $processor );
+		return $this->wrap( $body, $this->resolved_subject );
 	}
 
 	/**
@@ -316,7 +355,10 @@ final class Email {
 	public function preview(): string {
 		$processor = new Processor( $this->groups );
 
-		return $this->wrap( $processor->preview( $this->content ), $processor );
+		return $this->wrap(
+			$processor->preview( $this->content ),
+			self::one_line( $processor->preview( $this->subject ) )
+		);
 	}
 
 	/**
@@ -356,7 +398,7 @@ final class Email {
 
 		$headers = array_merge( [ 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) ], $this->headers );
 
-		$sent = wp_mail( $this->to, $this->subject, $html, $headers, $this->attachments );
+		$sent = wp_mail( $this->to, $this->resolved_subject, $html, $headers, $this->attachments );
 
 		/**
 		 * Fires after an email has been through wp_mail().
@@ -367,7 +409,7 @@ final class Email {
 		 *
 		 * @since 2.0.0
 		 */
-		do_action( Runtime::hook( 'sent' ), $sent, $this->to, $this->subject );
+		do_action( Runtime::hook( 'sent' ), $sent, $this->to, $this->resolved_subject );
 
 		return $sent
 			? true
@@ -377,34 +419,40 @@ final class Email {
 	/**
 	 * Put the body inside the visual template.
 	 *
-	 * @param string    $body      The body, with its tags filled in.
-	 * @param Processor $processor The processor, for the groups it used.
+	 * @param string $body    The body, with its tags filled in.
+	 * @param string $subject The subject, with its tags filled in.
 	 *
 	 * @return string
 	 */
-	private function wrap( string $body, Processor $processor ): string {
+	private function wrap( string $body, string $subject ): string {
 		$shell = Templates::get( $this->template );
 
 		$replacements = array_merge(
 			self::site_context(),
 			[
-				'title'    => $this->context['title'] ?? $this->subject,
+				'title'    => $subject,
 				'subtitle' => '',
 				'footer'   => '',
 				'logo'     => '',
-				'subject'  => $this->subject,
+				'subject'  => $subject,
 			],
 			$this->context,
 			[ 'content' => $body ]
 		);
 
-		$shell = strtr(
-			$shell,
-			array_combine(
-				array_map( static fn( string $key ): string => '{' . $key . '}', array_keys( $replacements ) ),
-				array_map( 'strval', $replacements )
-			)
-		);
+		$filled = [];
+
+		foreach ( $replacements as $key => $value ) {
+			// Text goes in as text. The title sits inside an <h1>, and a
+			// title built from a customer's name went in as whatever the
+			// name had in it. The body, the logo and the footer are markup by
+			// contract and go in as they are.
+			$filled[ '{' . $key . '}' ] = in_array( $key, self::MARKUP, true )
+				? (string) $value
+				: esc_html( (string) $value );
+		}
+
+		$shell = strtr( $shell, $filled );
 
 		// Anything the template asked for and nobody filled in. A template
 		// placeholder left in the markup shows up as `{colour_primary}` in

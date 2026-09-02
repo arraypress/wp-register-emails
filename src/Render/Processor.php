@@ -73,11 +73,6 @@ final class Processor {
 	 * @return string
 	 */
 	public function process( string $content, mixed $data ): string {
-		$this->problems = [];
-		$this->unknown  = [];
-
-		$tags = Tags::groups( $this->groups );
-
 		/**
 		 * Change an email before its tags are filled in.
 		 *
@@ -89,24 +84,7 @@ final class Processor {
 		 */
 		$content = (string) apply_filters( Runtime::hook( 'before_tags' ), $content, $this->groups, $data );
 
-		$replacements = [];
-
-		foreach ( $this->used_in( $content ) as $name ) {
-			$tag = $tags[ $name ] ?? null;
-
-			if ( null === $tag ) {
-				$this->unknown[]              = $name;
-				$replacements[ '{' . $name . '}' ] = '';
-
-				continue;
-			}
-
-			$replacements[ $tag->placeholder() ] = $this->one( $tag, $data );
-		}
-
-		if ( [] !== $replacements ) {
-			$content = strtr( $content, $replacements );
-		}
+		$content = $this->fill( $content, $data, false );
 
 		/**
 		 * Change an email after its tags are filled in.
@@ -118,6 +96,72 @@ final class Processor {
 		 * @since 2.0.0
 		 */
 		return (string) apply_filters( Runtime::hook( 'after_tags' ), $content, $this->groups, $data );
+	}
+
+	/**
+	 * Fill in what a line of plain text asks for.
+	 *
+	 * For the subject, which is a header and not markup. Every tag goes in
+	 * as words: the escaping a word was given for the body is undone, and a
+	 * component is reduced to what it says. `Smith &amp; Sons` in a subject
+	 * line is exactly what the customer would see.
+	 *
+	 * @param string $content The line, with tags in it.
+	 * @param mixed  $data    Whatever the email is about.
+	 *
+	 * @return string
+	 */
+	public function plain( string $content, mixed $data ): string {
+		return $this->fill( $content, $data, true );
+	}
+
+	/**
+	 * Fill the tags in, for markup or for a line of text.
+	 *
+	 * Starts a fresh report each time, so the problems and unknowns are
+	 * those of the content just filled in and not of everything this
+	 * processor has ever been handed.
+	 *
+	 * @param string $content The content, with tags in it.
+	 * @param mixed  $data    Whatever the email is about.
+	 * @param bool   $plain   Whether the result is text rather than markup.
+	 *
+	 * @return string
+	 */
+	private function fill( string $content, mixed $data, bool $plain ): string {
+		$this->problems = [];
+		$this->unknown  = [];
+
+		$tags         = Tags::groups( $this->groups );
+		$replacements = [];
+
+		foreach ( $this->used_in( $content ) as $name ) {
+			$tag = $tags[ $name ] ?? null;
+
+			if ( null === $tag ) {
+				$this->unknown[]                   = $name;
+				$replacements[ '{' . $name . '}' ] = '';
+
+				continue;
+			}
+
+			$rendered = $this->one( $tag, $data );
+
+			$replacements[ $tag->placeholder() ] = $plain ? self::text_of( $rendered ) : $rendered;
+		}
+
+		return [] === $replacements ? $content : strtr( $content, $replacements );
+	}
+
+	/**
+	 * What a filled-in tag says, with its markup taken out.
+	 *
+	 * @param string $rendered The tag, as it would go into the body.
+	 *
+	 * @return string
+	 */
+	private static function text_of( string $rendered ): string {
+		return wp_specialchars_decode( wp_strip_all_tags( $rendered ), ENT_QUOTES );
 	}
 
 	/**

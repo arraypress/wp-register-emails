@@ -25,8 +25,11 @@ if ( ! function_exists( 'register_email_tag' ) ) {
 	 *         'preview'  => 'Jane Doe',
 	 *     ] );
 	 *
-	 * A tag whose `type` names a component draws that instead, and its
-	 * callback returns the component's arguments:
+	 * What the callback returns goes in as text — a billing name with a
+	 * `<b>` in it reads as one. A tag whose `type` is `html` returns markup
+	 * it built itself, which goes in as it is. A tag whose `type` names a
+	 * component draws that instead, and its callback returns the component's
+	 * arguments:
 	 *
 	 *     register_email_tag( 'shop', 'view_order', [
 	 *         'type'     => 'button',
@@ -59,7 +62,8 @@ if ( ! function_exists( 'register_email' ) ) {
 	 *     ] );
 	 *
 	 * `settings` returns whatever the site owner has configured — `subject`,
-	 * `content`, `enabled`, `context` — and wins over the defaults above.
+	 * `content`, `to`, `enabled`, `context` — and wins over the defaults
+	 * above. Tags work in the subject as well as the body.
 	 *
 	 * @param string               $group  Whose it is.
 	 * @param string               $name   Its name.

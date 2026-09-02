@@ -230,6 +230,92 @@ final class EmailTest extends TestCase {
 		$this->assertSame( 'The shop', ( new Processor( [ 'general', 'shop' ] ) )->process( '{site_name}', null ) );
 	}
 
+	/**
+	 * The subject is filled in too, as one line of text.
+	 *
+	 * `Your order from {site_name}` is the first example in the README and
+	 * it used to reach the customer exactly like that: only the body went
+	 * through the processor. A subject is a header, so what the tag returns
+	 * goes in as words — no entity for the ampersand, no line break — while
+	 * the same tag in the body is escaped for markup.
+	 */
+	public function test_the_subject_is_filled_in_as_one_line_of_text(): void {
+		$this->tags();
+
+		Email::make()
+			->to( 'customer@example.test' )
+			->subject( 'Your order, {customer_name}' )
+			->content( 'Thanks {customer_name}.' )
+			->tags( 'shop' )
+			->about( (object) [ 'name' => "Smith & Sons\r\nLtd", 'total' => 1 ] )
+			->send();
+
+		$mail = $GLOBALS['re_mail'][0];
+
+		$this->assertSame( 'Your order, Smith & Sons Ltd', $mail['subject'] );
+		$this->assertStringContainsString( 'Thanks Smith &amp; Sons', $mail['message'] );
+
+		// And the title the template shows is the subject, escaped for the
+		// <h1> it sits in.
+		$this->assertStringContainsString( 'Your order, Smith &amp; Sons Ltd', $mail['message'] );
+	}
+
+	/**
+	 * A tag that fails in the subject stops the email as surely as one in
+	 * the body.
+	 */
+	public function test_a_failed_tag_in_the_subject_stops_the_email(): void {
+		Tags::add( 'shop', 'order_id', [
+			'callback' => static function (): string {
+				throw new RuntimeException( 'no order' );
+			},
+		] );
+
+		$sent = Email::make()
+			->to( 'customer@example.test' )
+			->subject( 'Order {order_id}' )
+			->content( 'Thanks.' )
+			->tags( 'shop' )
+			->send();
+
+		$this->assertInstanceOf( WP_Error::class, $sent );
+		$this->assertSame( [], $GLOBALS['re_mail'], 'It sent anyway.' );
+	}
+
+	/**
+	 * A text tag goes in as text.
+	 *
+	 * What a text tag's callback returns is very often what a customer
+	 * typed — the billing name, the note on the order — and it went straight
+	 * into the markup. A customer who put a tag in their name put a tag in
+	 * the shop's email.
+	 */
+	public function test_a_text_tag_goes_in_as_text(): void {
+		Tags::add( 'shop', 'customer_name', [
+			'callback' => static fn(): string => '<b>x</b>',
+		] );
+
+		$html = ( new Processor( [ 'shop' ] ) )->process( 'Hello {customer_name}.', null );
+
+		$this->assertStringContainsString( 'Hello &lt;b&gt;x&lt;/b&gt;.', $html );
+		$this->assertStringNotContainsString( '<b>x</b>', $html );
+	}
+
+	/**
+	 * A tag that says it returns markup is trusted to.
+	 */
+	public function test_an_html_tag_goes_in_as_it_is(): void {
+		Tags::add( 'shop', 'signature', [
+			'type'     => 'html',
+			'callback' => static fn(): string => '<b>x</b>',
+		] );
+
+		$this->assertStringContainsString(
+			'<b>x</b>',
+			( new Processor( [ 'shop' ] ) )->process( 'Regards, {signature}', null )
+		);
+	}
+
 	/* ---------------------------------------------------------------------
 	 * Components
 	 * ------------------------------------------------------------------ */
@@ -470,6 +556,57 @@ final class EmailTest extends TestCase {
 	}
 
 	/**
+	 * The title goes into the template as text; the footer as markup.
+	 *
+	 * The title sits inside an <h1>, and one built from a customer's name
+	 * went in as whatever the name had in it. The footer is drawn by a Part
+	 * and is markup by contract — escaping it would show the tags.
+	 */
+	public function test_the_title_goes_in_as_text_and_the_footer_as_markup(): void {
+		$this->with_template( '<div>{title}|{subtitle}|{footer}|{content}</div>' );
+
+		$html = Email::make()
+			->content( '<p>Thanks.</p>' )
+			->context(
+				[
+					'title'    => 'Order for <script>alert(1)</script>',
+					'subtitle' => 'Smith & Sons',
+					'footer'   => '<p>&copy; Example Shop</p>',
+				]
+			)
+			->html();
+
+		$this->assertStringContainsString( 'Order for &lt;script&gt;alert(1)&lt;/script&gt;', $html );
+		$this->assertStringContainsString( '|Smith &amp; Sons|', $html );
+		$this->assertStringContainsString( '|<p>&copy; Example Shop</p>|<p>Thanks.</p>', $html );
+		$this->assertStringNotContainsString( '<script>', $html );
+	}
+
+	/**
+	 * A template name cannot leave the templates directory.
+	 *
+	 * The name went straight into a path, so `../../wp-config` was a
+	 * template name and anything ending in .html anywhere on the disk could
+	 * be read back as the shell of an email.
+	 */
+	public function test_a_template_name_cannot_leave_the_templates_directory(): void {
+		$this->with_template( '<div>{content}</div>' );
+
+		$outside = sys_get_temp_dir() . '/re-outside.html';
+
+		file_put_contents( $outside, '<div>NOT-A-TEMPLATE</div>' );
+
+		try {
+			$html = Templates::get( '../re-outside' );
+
+			$this->assertStringNotContainsString( 'NOT-A-TEMPLATE', $html );
+			$this->assertSame( '<div>{content}</div>', $html, 'The default should have been used instead.' );
+		} finally {
+			unlink( $outside );
+		}
+	}
+
+	/**
 	 * The template knows about the site, in the site's own timezone.
 	 *
 	 * A copyright line that says last year for the first few hours of the new
@@ -562,6 +699,53 @@ final class EmailTest extends TestCase {
 
 		$this->assertSame( 'Your order is on its way', $GLOBALS['re_mail'][0]['subject'] );
 		$this->assertStringContainsString( 'We are packing it now, Jane Doe.', $GLOBALS['re_mail'][0]['message'] );
+	}
+
+	/**
+	 * The site owner's settings are asked for once per send.
+	 *
+	 * They were asked for twice — once to see whether the email was turned
+	 * on, and again to build it — which is nothing for a callback that reads
+	 * an option and something for one that runs a query.
+	 */
+	public function test_the_site_owners_settings_are_asked_for_once(): void {
+		$asked = 0;
+
+		Emails::add( 'shop', 'order_confirmation', [
+			'content'  => 'Thanks.',
+			'settings' => static function () use ( &$asked ): array {
+				++$asked;
+
+				return [ 'enabled' => true ];
+			},
+		] );
+
+		Emails::send( 'shop', 'order_confirmation', [ 'to' => 'customer@example.test' ] );
+
+		$this->assertSame( 1, $asked );
+	}
+
+	/**
+	 * The recipient the site owner configured is used when the call names
+	 * nobody.
+	 *
+	 * A receipt goes to whoever the call names. A sale notification goes to
+	 * whoever the owner typed into the settings screen, and that is the case
+	 * where nothing at the call site knows the address.
+	 */
+	public function test_the_site_owners_recipient_is_used_when_the_call_names_nobody(): void {
+		Emails::add( 'shop', 'sale_notification', [
+			'content'  => 'A sale.',
+			'settings' => static fn(): array => [ 'to' => [ 'owner@example.test', 'accounts@example.test' ] ],
+		] );
+
+		$this->assertTrue( Emails::send( 'shop', 'sale_notification' ) );
+		$this->assertSame( [ 'owner@example.test', 'accounts@example.test' ], $GLOBALS['re_mail'][0]['to'] );
+
+		// And the call still wins when it does name somebody.
+		Emails::send( 'shop', 'sale_notification', [ 'to' => 'customer@example.test' ] );
+
+		$this->assertSame( [ 'customer@example.test' ], $GLOBALS['re_mail'][1]['to'] );
 	}
 
 	/**

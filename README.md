@@ -58,6 +58,14 @@ send_registered_email( 'shop', 'receipt', [ 'to' => $order->email ] );
 The `preview` value is what makes the tester useful — without it, previewing
 an email means having an order to preview it against.
 
+## Tag types
+
+A tag's `type` says how what its callback returns goes in. `text`, the
+default, goes in as text — a billing name with markup in it reads as the name.
+`html` goes in as it is, for a callback that builds its own markup. Any
+component name — `button`, `order_items`, `alert` — draws that component from
+what the callback returns. Tags work in the subject line as well as the body.
+
 ## Requirements
 
 * PHP 8.3 or later

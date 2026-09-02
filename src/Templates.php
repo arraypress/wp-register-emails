@@ -1,12 +1,11 @@
 <?php
 /**
- * Email Templates Manager
+ * Templates
  *
  * @package     ArrayPress\RegisterEmails
- * @copyright   Copyright (c) 2025, ArrayPress Limited
+ * @copyright   Copyright (c) 2026, ArrayPress Limited
  * @license     GPL2+
- * @version     1.0.0
- * @author      David Sherlock
+ * @since       2.0.0
  */
 
 declare( strict_types=1 );
@@ -49,6 +48,8 @@ class Templates {
 	 * @since 1.0.0
 	 */
 	public static function get( string $template = 'default' ): string {
+		$template = self::name( $template );
+
 		// Check theme override first
 		$html = self::get_theme_template( $template );
 
@@ -75,6 +76,21 @@ class Templates {
 		 * @since 1.0.0
 		 */
 		return apply_filters( 'register_emails_template', $html, $template );
+	}
+
+	/**
+	 * A template name that can only name a file in a templates directory.
+	 *
+	 * The name went straight into a path, so `../../wp-config` was a
+	 * template name and anything ending in .html anywhere on the disk could
+	 * be read back as the shell of an email.
+	 *
+	 * @param string $template Template name, as given.
+	 *
+	 * @return string
+	 */
+	private static function name( string $template ): string {
+		return sanitize_file_name( basename( $template ) );
 	}
 
 	/**
@@ -178,6 +194,8 @@ class Templates {
 	 * @since 1.0.0
 	 */
 	public static function get_template_meta( string $template ): array {
+		$template = self::name( $template );
+
 		if ( isset( self::$template_meta[ $template ] ) ) {
 			return self::$template_meta[ $template ];
 		}
@@ -226,8 +244,6 @@ class Templates {
 		return in_array( $template, self::get_available_templates(), true );
 	}
 
-	// In ArrayPress\RegisterEmails\Templates
-
 	/**
 	 * Get template options for select fields.
 	 *
@@ -247,7 +263,7 @@ class Templates {
 		}
 
 		if ( empty( $options ) ) {
-			$options['default'] = __( 'Default', 'register-emails' );
+			$options['default'] = __( 'Default', 'arraypress' );
 		}
 
 		/**
